@@ -1,3 +1,5 @@
+// Loss in Life Expectancy Does Not Adjust Confounding
+
 // Data from http://www.mortality.org/
 // Sweden, Death rates (period 1x1)
 // Updated by 20240729 Enoch Chen
@@ -6,6 +8,7 @@
 // for Stata to be able to recognize age as a numeric variable.
 
 clear all
+cd "/Users/yitche/Library/CloudStorage/OneDrive-KarolinskaInstitutet/ec_phd/Researchers/yuliya_leontyeva/Study_compLLE/simulation/"
 
 infile _year _age female male total using "death_rates_sweden_from_HMD.txt" ///
 if (_year > 1949 & _age <110 ), clear

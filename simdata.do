@@ -1,11 +1,10 @@
-// Loss in Life Expectancy Does Not Adjust Confounding
-// Updated by 20240729 Enoch Chen
-
-// Simulate two groups with hazard ratio = 1
+// I want to simulate two groups with hazard ratio = 1
 // Both with sex 1, year 1990, survival times follow weibull(lambda 0.2, gamma 1)
 // but with the following differences:
 // Treatment 1: 1000 individuals age ~ rnormal(60, 10)
 // Treatment 0: 1000 individuals age ~ rnormal(50, 10)
+
+cd "/Users/yitche/Library/CloudStorage/OneDrive-KarolinskaInstitutet/ec_phd/Researchers/yuliya_leontyeva/Study_compLLE/simulation/"
 
 clear all
 

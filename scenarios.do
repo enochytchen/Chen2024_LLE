@@ -1,54 +1,4 @@
-// Loss in Life Expectancy Does Not Adjust Confounding
-
-// Updated by 20240729 Enoch Chen
-
-/*==============
-// Scenario 0 //
-===============*/
-// Plot K-M curve of two groups and estimate area under curve (LE)
-use simdata, clear
-stset stime, failure(died = 1)
-
-/* No age standardisation involved*/
-// Plot age distributions
-twoway (histogram age if trt == 0, frequency color(red%70)) ///
-	   (histogram age if trt == 1, frequency color(blue%70)), ///
-        xscale(range(0 100)) xlab(0(20)100) ///
-		yscale(range(0 250)) ylab(0(50)250) ///
-		xtitle("Age (years)") ///
-        legend(order(1 "Treatment X=0"  2 "Treatment X=1")) ///
-		title("Scenario 0: Observed age distributions by treatment") ///
-		text(250 70 "Age distribution X=1 ~ Normal(60,10)", size(medlarge) justification(left)) ///
-		text(230 70 "Age distribution X=0 ~ Normal(50,10)", size(medlarge) justification(left)) //
-
-graph export "./output/agedist_sc0.png", replace
-
-
-// Log-rank test
-sts test trt 
-
-// Estiamte restricted mean survival time
-strmst2 trt
-matrix rmst_arm0 = r(rmstarm0)
-matrix rmst_arm1 = r(rmstarm1)
-scalar le1_sc0 = rmst_arm1[1,1]
-scalar le0_sc0 = rmst_arm0[1,1]
-
-global le1_sc0: display %9.1f le1_sc0
-global le0_sc0: display %9.1f le0_sc0
-
-
-// Plot K-M curves
-sts graph, by(trt) legend(order(1 "Treament X=0" 2 "Treatment X=1")) ///
-           plot1opts(lcolor(red%70) lwidth(0.7)) plot2opts(lcolor(blue%70) lwidth(0.7)) ///
-		   xtitle("Time (years)") ytitle("Survival probability") ///
-		   title("Scenario 0: area under Kaplan-Meier curve") ///
-		   text(1 30  "Log-rank test, p-value = 0.84", size(medlarge) justification(left)) ///
-		   text(0.9 30  "Area under curve (X=1): 5.03", size(medlarge) justification(left)) ///
-		   text(0.8 30  "Area under curve (X=0): 5.09", size(medlarge) justification(left))
-		   
-
-graph export "./output/sc0.png", as(png) replace
+cd "/Users/yitche/Library/CloudStorage/OneDrive-KarolinskaInstitutet/ec_phd/Researchers/yuliya_leontyeva/Study_compLLE/simulation/"
 
 /*===================
 == Survival models ==
@@ -83,8 +33,8 @@ twoway (histogram age if trt == 0, frequency color(red%70)) ///
 	   (histogram age if trt == 1, frequency color(blue%70)), ///
         xscale(range(0 100)) xlab(0(20)100) ///
 		yscale(range(0 250)) ylab(0(50)250) ///
-        legend(order(1 "Treatment X=0"  2 "Treatment X=1")) ///
-		title("Scenario 1: Without age standardization") ///
+        legend(order(1 "No treatment X=0"  2 "Treatment X=1")) ///
+		title("Scenario 1: Non-standardization") ///
 		xtitle("Age (years)") ///
 		text(250 70 "Age distribution X=1 ~ Normal(60,10)", size(medlarge) justification(left)) ///
 		text(230 70 "Age distribution X=0 ~ Normal(50,10)", size(medlarge) justification(left)) //
@@ -172,7 +122,7 @@ twoway (histogram age if trt == 1, frequency color(blue%70)) ///
 	   (histogram age if trt == 1, frequency color(red%70)), ///
         xscale(range(0 100)) xlab(0(20)100) ///
 		yscale(range(0 250)) ylab(0(50)250) ///
-        legend(order(2 "Treatment X=0"  1 "Treatment X=1")) ///
+        legend(order(2 "No treatment X=0"  1 "Treatment X=1")) ///
 		title("Scenario 2: Age standardized to X=1") ///
 		xtitle("Age (years)") ///
 		text(250 65 "Age distribution X=1 ~ Normal(60,10)", size(medlarge) justification(left)) ///
@@ -263,7 +213,7 @@ twoway (histogram age if trt == 0, frequency color(red%70)) ///
 	   (histogram age if trt == 0, frequency color(blue%70)), ///
         xscale(range(0 100)) xlab(0(20)100) ///
 		yscale(range(0 250)) ylab(0(50)250) ///
-        legend(order(1 "Treatment X=0"  2 "Treatment X=1")) ///
+        legend(order(1 "No treatment X=0"  2 "Treatment X=1")) ///
 		title("Scenario 3: Age standardized to X=0") ///
 		xtitle("Age (years)") ///
 		text(250 70 "Age distribution X=1 ~ Age distribution X=0", size(medlarge) justification(left)) ///
@@ -355,7 +305,7 @@ twoway (histogram age , frequency color(red%50)) ///
 	   (histogram age , frequency color(blue%50)), ///
         xscale(range(0 100)) xlab(0(20)100) ///
 		yscale(range(0 250)) ylab(0(50)250) ///
-        legend(order(1 "Treatment X=0"  2 "Treatment X=1")) ///
+        legend(order(1 "No treatment X=0"  2 "Treatment X=1")) ///
 		title("Scenario 4: Age standardized to X=1 + X=0") ///
 		xtitle("Age (years)") ///
 		text(250 60 "Age distribution X=1 ~ Age distribution X=1 + X=0", size(medlarge) justification(left)) ///
@@ -451,11 +401,6 @@ gen mean_lle= .
 expand 2
 replace trt = 0 in 2
 
-// Scenario 0
-replace scenario = 0 
-replace mean_le = $le1_sc0 if trt == 1
-replace mean_le = $le0_sc0 if trt == 0
-
 // Scenario 1 to 4
 forvalues i = 1/4 {
     preserve
@@ -480,6 +425,7 @@ forvalues i = 1/4 {
     append using `sc`i''
 }
 
+drop if scenario == .
 sort scenario
 by scenario: gen diff_le = round(mean_le - mean_le[_n+1], 0.1)
 by scenario: gen diff_leexp = round(mean_leexp - mean_leexp[_n+1], 0.1)
@@ -487,7 +433,6 @@ by scenario: gen diff_lle = round(mean_lle - mean_lle[_n+1], 0.1)
 
 // Add a variable to indicate standardization
 gen agestd = ""
-replace agestd = "N/A" if scenario == 0
 replace agestd = "Without standardization" if scenario == 1
 replace agestd = "Treatment" if scenario == 2
 replace agestd = "No treatment" if scenario == 3
